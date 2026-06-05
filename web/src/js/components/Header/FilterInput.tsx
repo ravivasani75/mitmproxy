@@ -1,16 +1,17 @@
 import React, { Component } from "react";
 import classnames from "classnames";
 import Filt from "../../filt/filt";
+import Icon, { type IconName } from "../common/Icon";
 import FilterDocs from "./FilterDocs";
 
 export enum FilterIcon {
     SEARCH = "search",
-    HIGHLIGHT = "tag",
-    INTERCEPT = "pause",
+    HIGHLIGHT = "highlight",
+    INTERCEPT = "intercept",
 }
 
 type FilterInputProps = {
-    icon: FilterIcon;
+    icon: IconName;
     color: string;
     placeholder: string;
     value: string;
@@ -51,7 +52,13 @@ export default class FilterInput extends Component<
     }
 
     UNSAFE_componentWillReceiveProps(nextProps) {
-        this.setState({ value: nextProps.value });
+        // Local state intentionally diverges from props while typing
+        // (only valid filters reach the parent via `onChange`), so an
+        // unconditional sync would wipe the user's in-progress text on
+        // any unrelated parent re-render.
+        if (nextProps.value !== this.props.value) {
+            this.setState({ value: nextProps.value });
+        }
     }
 
     isValid(filt: string) {
@@ -139,13 +146,15 @@ export default class FilterInput extends Component<
                 })}
             >
                 <span className="input-group-addon">
-                    <i className={"fa fa-fw fa-" + icon} style={{ color }} />
+                    <span style={{ color }}>
+                        <Icon name={icon} strokeWidth={2.5} />
+                    </span>
                 </span>
                 <input
                     type="text"
                     ref={this.inputRef}
                     placeholder={placeholder}
-                    className="form-control"
+                    className="input"
                     value={value}
                     onChange={this.onChange}
                     onFocus={this.onFocus}
